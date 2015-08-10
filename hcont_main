@@ -1,0 +1,7 @@
+topatchmaster='/data/Userek/marci/analizis/patchmasterbatch/E9Batch.in';
+frompatchmaster='/data/Userek/marci/analizis/patchmasterbatch/E9Batch.out';
+
+signature=round(rand(1)*100000);
+order='MakeAnerror';
+
+save(topatchmaster, signature, order);
