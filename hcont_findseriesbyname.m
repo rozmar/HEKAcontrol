@@ -4,7 +4,13 @@ names=struct;
 %potentialnames={'iv','IV'};
 %excludename={'pp'};
 order='GetChildren 1 1 1 1 0';
-[answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+answer=struct;
+megvolt=0;
+while ~isfield(answer,'ans')
+%     megvolt=megvolt+1;
+    [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+end
+% disp(megvolt)
 groupnum=str2double(cell2mat(answer.ans(2)));
 for groupi=1:groupnum;
     order=['GetChildren ',num2str(groupi),' 1 1 1 1'];

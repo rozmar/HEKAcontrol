@@ -30,7 +30,7 @@ for i=1:length(hekafiledirs)
             hekafnames{tempdb,1}=hekafiledir;
             hekafnames{tempdb,2}=temp(j).name;
             hekafnames{tempdb,3}=datenum(char(temp(j).date),0);
-            if length(temp(j).name)>9
+            if length(temp(j).name)>9 & ~isempty(str2num(temp(j).name(1:6)))
                 hekafnames{tempdb,4}=datenum(temp(j).name(1:6),'yymmdd');
                 hekafnames{tempdb,5}=abs(cell2mat(hekafnames(tempdb,3))-cell2mat(hekafnames(tempdb,4)));
             else

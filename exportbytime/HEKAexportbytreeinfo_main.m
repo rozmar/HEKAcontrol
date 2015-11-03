@@ -1,4 +1,4 @@
-function rawdata=HEKAexportbytime_main(fname,setupname,channel,starttime,endtime)
+function rawdata=HEKAexportbytreeinfo_main(fname,setupname,seriesnums,seriesdata,neededseriesnums)
 % %%
 % fname='1305031rm.dat';
 % setupname='2P3DAO';
@@ -46,21 +46,15 @@ for filenumber=1:length(vesszohely)+1
     order='GetParameters DataFile';
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
     disp(fname);
-    [seriesnums,seriesdata]=hcont_findseriesbyname({},{},signature,lastsignature,lastmodify);
     %%
-    potentialtracenames{1}=['Vmon-',num2str(channel)];
-    potentialtracenames{2}=['Imon-',num2str(channel)];
-    if starttime<endtime
-        potseriesnums=find([seriesdata.realtime]>=starttime & [seriesdata.realtime]<=endtime);
-    else
-        potseriesnums=find([seriesdata.realtime]>=starttime | [seriesdata.realtime]<=endtime);
-    end
+    
+    
 %     rawdata=struct;
-    for i=1:length(potseriesnums)
-        potsnum=potseriesnums(i);
+    for i=1:length(neededseriesnums)
+        potsnum=neededseriesnums(i);
         for tracenum=1:seriesnums(potsnum,4)
             tracename=char(seriesdata(potsnum).tracename(tracenum));
-            if any(strcmp(tracename,potentialtracenames));
+%             if any(strcmp(tracename,potentialtracenames));
                 groupnum=seriesnums(potsnum,1);
                 seriesnum=seriesnums(potsnum,2);
                 sweepdb=seriesnums(potsnum,3);
@@ -144,7 +138,7 @@ for filenumber=1:length(vesszohely)+1
                     rawdata(NEXT).Amplifierholding=Amplifierholding;
                     %                 disp(AmplifierMode)
                 end
-            end
+%             end
         end
     end
 end

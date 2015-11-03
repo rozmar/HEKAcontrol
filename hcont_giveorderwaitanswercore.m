@@ -10,8 +10,9 @@ frompatchmaster=[locations.hekabatch,'E9Batch.Out'];
 
 temp=dir(frompatchmaster);
 if isempty(temp) %% ha nincs output file, akkor csinál input filet a patchmasternek
+    %%
     outfile = fopen(topatchmaster, 'wt' ); % ,'b','UTF-7');
-    fprintf(outfile,'%s\r\n', num2str(-1),'acknowledged aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
+    fprintf(outfile,'%s\r\n', num2str(-1123),'acknowledged aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa');
     fclose(outfile);
     outfile = fopen(topatchmaster,'r+'); % ,'b','UTF-7');;
     fwrite(outfile, '+');
@@ -35,6 +36,7 @@ end
 %%% megcsinálja az egyedi parancsazonosítót
 
 %%%% parancs fileba írása
+%%
 outfile = fopen(topatchmaster, 'wt'); % ,'b','UTF-7');
 %fileba={ num2str(signature), order};
 fprintf(outfile, '%s\r\n', num2str(-signature), order);
@@ -42,6 +44,7 @@ fclose(outfile);
 outfile = fopen(topatchmaster,'r+'); % ,'b','UTF-7');;
 fwrite(outfile, '+');
 fclose(outfile);
+%%
 %%%% parancs fileba írása
 
 %%% várakozás a válaszra
