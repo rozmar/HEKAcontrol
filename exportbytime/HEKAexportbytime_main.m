@@ -12,6 +12,7 @@ locations=marcicucca_locations;
 exportdir=[locations.tgtardir,'ANALYSISdata/marci/Exportdir/'];
 winexportdir=[locations.tgtarwindir,'ANALYSISdata\marci\Exportdir\'];
 windirname=[locations.tgtarwindir,'HEKAdata\',setupname];
+treeinfodir=[locations.tgtardir,'MATLABdata/TreeData/',setupname];
 
 error=[];
 if ~exist('signature','var')
@@ -36,7 +37,8 @@ for filenumber=1:length(vesszohely)+1
         vesszohelyuj=[0,vesszohely,length(fnameold)+1];
         fname=fnameold(vesszohelyuj(filenumber)+1:vesszohelyuj(filenumber+1)-1);
     end
-    pause(1)
+    a=dir([treeinfodir,'/',fname,'.mat']);
+    
     
     order=['OpenOnlineFile "anyexport.onl"'];
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
@@ -46,7 +48,14 @@ for filenumber=1:length(vesszohely)+1
     order='GetParameters DataFile';
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
     disp(fname);
-    [seriesnums,seriesdata]=hcont_findseriesbyname({},{},signature,lastsignature,lastmodify);
+    if isempty(a)
+        pause(1)
+        [seriesnums,seriesdata]=hcont_findseriesbyname({},{},signature,lastsignature,lastmodify);
+        save([treeinfodir,'/',fname,'.mat'],'seriesnums','seriesdata');
+    else
+        load([treeinfodir,'/',fname,'.mat']);
+        
+    end
     %%
     potentialtracenames{1}=['Vmon-',num2str(channel)];
     potentialtracenames{2}=['Imon-',num2str(channel)];
