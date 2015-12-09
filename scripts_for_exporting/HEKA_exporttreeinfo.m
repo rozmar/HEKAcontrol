@@ -1,5 +1,5 @@
 function [seriesnums,seriesdata]=HEKA_exporttreeinfo(windirname,fname)
-close all
+% close all
 locations=marcicucca_locations;
 exportdir=[locations.tgtardir,'ANALYSISdata/marci/Exportdir/'];
 winexportdir=[locations.tgtarwindir,'ANALYSISdata\marci\Exportdir\'];
