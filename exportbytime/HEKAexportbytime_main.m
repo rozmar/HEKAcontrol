@@ -123,9 +123,19 @@ for filenumber=1:length(vesszohely)+1
                 for analnum=1:20
                     analname=['Analysis_',num2str(groupnum),'_',num2str(seriesnum),'_'];
                     if mod(analnum,2)==0;
-                        segmenttime=[segmenttime,temp.([analname,num2str(analnum)])];
+                        if isfield(temp,([analname,num2str(analnum)])) % kókányolás egy hibás file miatt 1512082rm
+                            segmenttime=[segmenttime,temp.([analname,num2str(analnum)])]; %csak ez a lényeg
+                        else
+                            analname=['Analysis_',num2str(groupnum),'_',num2str(seriesnum+1),'_'];% kókányolás egy hibás file miatt 1512082rm
+                            segmenttime=[segmenttime,temp.([analname,num2str(analnum)])];% kókányolás egy hibás file miatt 1512082rm
+                        end   % kókányolás egy hibás file miatt 1512082rm
                     else
-                        segmentampl=[segmentampl,temp.([analname,num2str(analnum)])];
+                        if isfield(temp,([analname,num2str(analnum)])) % kókányolás egy hibás file miatt 1512082rm
+                            segmentampl=[segmentampl,temp.([analname,num2str(analnum)])]; %csak ez a lényeg
+                        else
+                            analname=['Analysis_',num2str(groupnum),'_',num2str(seriesnum+1),'_'];% kókányolás egy hibás file miatt 1512082rm
+                            segmentampl=[segmentampl,temp.([analname,num2str(analnum)])];% kókányolás egy hibás file miatt 1512082rm
+                        end   % kókányolás egy hibás file miatt 1512082rm
                     end
                 end
                 for sweepnum=1:sweepdb
@@ -145,7 +155,11 @@ for filenumber=1:length(vesszohely)+1
                     rawdata(NEXT).tracenumber=seriesdata(potsnum).tracenum(tracenum);
                     rawdata(NEXT).realtime=segmenttime(sweepnum,end);
                     rawdata(NEXT).timertime=segmentampl(sweepnum,end);
-                    tempdata=temp.(['Trace_',num2str(groupnum),'_',num2str(seriesnum),'_',num2str(sweepnum),'_',num2str(rawdata(NEXT).tracenumber)]);
+                    if isfield(temp,(['Trace_',num2str(groupnum),'_',num2str(seriesnum),'_',num2str(sweepnum),'_',num2str(rawdata(NEXT).tracenumber)])) % kókányolás egy hibás file miatt 1512082rm
+                        tempdata=temp.(['Trace_',num2str(groupnum),'_',num2str(seriesnum),'_',num2str(sweepnum),'_',num2str(rawdata(NEXT).tracenumber)]); %ez a lényeg
+                    else % kókányolás egy hibás file miatt 1512082rm
+                        tempdata=temp.(['Trace_',num2str(groupnum),'_',num2str(seriesnum+1),'_',num2str(sweepnum),'_',num2str(rawdata(NEXT).tracenumber)]);  % kókányolás egy hibás file miatt 1512082rm
+                    end % kókányolás egy hibás file miatt 1512082rm
                     rawdata(NEXT).y=tempdata(:,2)';
                     rawdata(NEXT).si=mode(diff(tempdata(:,1)));
                     rawdata(NEXT).AmplifierID=AmplifierID;
