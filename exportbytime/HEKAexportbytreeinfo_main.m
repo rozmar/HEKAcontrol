@@ -42,7 +42,7 @@ for filenumber=1:length(vesszohely)+1
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
     order=['OpenFile read ',windirname,'\',fname];
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
-    pause(.2);
+    pause(1);
     order='GetParameters DataFile';
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
     disp(fname);
@@ -128,6 +128,7 @@ for filenumber=1:length(vesszohely)+1
                     rawdata(NEXT).seriesnums=seriesnums(potsnum,:);
                     rawdata(NEXT).channellabel=tracename;
                     rawdata(NEXT).tracenumber=seriesdata(potsnum).tracenum(tracenum);
+                    rawdata(NEXT).seriesname=seriesdata(potsnum).seriesname;
                     rawdata(NEXT).realtime=segmenttime(sweepnum,end);
                     rawdata(NEXT).timertime=segmentampl(sweepnum,end);
                     tempdata=temp.(['Trace_',num2str(groupnum),'_',num2str(seriesnum),'_',num2str(sweepnum),'_',num2str(rawdata(NEXT).tracenumber)]);
