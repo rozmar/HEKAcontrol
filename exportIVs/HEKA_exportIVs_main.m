@@ -125,7 +125,7 @@ for i=1:size(hekafnames,1)
                 pause(.1);
                 order=['SetTarget 1 1 1 1 0 FALSE FALSE'];
                 [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
-                pause(.1);
+                pause(.3);
                 order=['Set R  UnmarkIt'];
                 [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
                 pause(.1);
