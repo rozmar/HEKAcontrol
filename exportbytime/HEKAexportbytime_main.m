@@ -138,7 +138,9 @@ for filenumber=1:length(vesszohely)+1
                         end   % kókányolás egy hibás file miatt 1512082rm
                     end
                 end
-                for sweepnum=1:sweepdb
+                readbinaryfileaswell=1; % for the first sweep the length of the sweep is checked
+                for sweepnum=1:sweepdb    
+                    %%
                     if isempty(fieldnames(rawdata))
                         NEXT=1;
                     else
@@ -160,7 +162,88 @@ for filenumber=1:length(vesszohely)+1
                     else % kókányolás egy hibás file miatt 1512082rm
                         tempdata=temp.(['Trace_',num2str(groupnum),'_',num2str(seriesnum+1),'_',num2str(sweepnum),'_',num2str(rawdata(NEXT).tracenumber)]);  % kókányolás egy hibás file miatt 1512082rm
                     end % kókányolás egy hibás file miatt 1512082rm
-                    rawdata(NEXT).y=tempdata(:,2)';
+                    %%
+                    if readbinaryfileaswell==1
+                        order=['SetTarget ',num2str(groupnum),' ',num2str(seriesnum),' ',num2str(sweepnum),' ',num2str(1),' 3  TRUE TRUE'];
+                        [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+                        order=['SweepInfoExt'];
+                        [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+                        tracedb=(length(answer.ans)-3)/12;
+                        tracenums=[];
+                        for tracedbi=1:tracedb
+                            tracenumtemp=answer.ans{(tracedbi-1)*12+4};
+                            tracenumtemp(tracenumtemp==',' |tracenumtemp==';')=[];
+                            tracenums(tracedbi)=str2num(tracenumtemp);
+                        end
+                        tracenumidx=find(tracenums==rawdata(NEXT).tracenumber);
+                        offsetfrombeginningoffileinbytes=answer.ans{12*(tracenumidx-1)+10};
+                        offsetfrombeginningoffileinbytes(offsetfrombeginningoffileinbytes==',' |offsetfrombeginningoffileinbytes==';')=[];
+                        offsetfrombeginningoffileinbytes=str2num(offsetfrombeginningoffileinbytes);
+                        datalength=answer.ans{12*(tracenumidx-1)+5};
+                        datalength(datalength==',' |datalength==';')=[];
+                        datalength=str2num(datalength);
+                        datafactor=answer.ans{12*(tracenumidx-1)+7};
+                        datafactor(datafactor==',' |datafactor==';')=[];
+                        datafactor=str2num(datafactor);
+                        datatype=answer.ans{12*(tracenumidx-1)+13};
+                        datatype(datatype==',' |datatype==';')=[];
+                        datatype=str2num(datatype);
+                        
+                        
+                        
+                        if datatype==0
+                            datatypestr='int16';
+                        elseif datatype==1
+                            datatypestr='int32';
+                        elseif datatype==2
+                            datatypestr='uint32';
+                        elseif datatype==3
+                            datatypestr='uint64';
+                        end
+                        
+                        interleaveblocksize=answer.ans{12*(tracenumidx-1)+11};
+                        interleaveblocksize(interleaveblocksize==',' |interleaveblocksize==';')=[];
+                        interleaveblocksize=str2num(interleaveblocksize);
+                        
+                        interleaveskipbytes=answer.ans{12*(tracenumidx-1)+12};
+                        interleaveskipbytes(interleaveskipbytes==',' |interleaveskipbytes==';')=[];
+                        interleaveskipbytes=str2num(interleaveskipbytes);
+                        
+                        
+                        endiantype=answer.ans{12*(tracenumidx-1)+14};
+                        endiantype(endiantype==',' |endiantype==';')=[];
+                        endiantype=str2num(endiantype);
+                        if endiantype==0
+                            endiantypestr='b';
+                        else
+                            endiantypestr='l';
+                        end
+                        if size(tempdata,1)<datalength | sweepnum>1 % if the first sweep is well exported it won't go sweep by sweep, the data is exported from the binary file if there is a length mismatch
+                            disp(['group:',num2str(groupnum),' series:',num2str(seriesnum),' sweep:',num2str(sweepnum),'  is exported from binary - probably a continuous trace']);
+                            %%
+                            readedfrombinary=[];
+                            fileID = fopen([locations.tgtardir,'HEKAdata/',setupname,'/',fname,'.dat'],'r',endiantypestr);
+                            fseek(fileID,offsetfrombeginningoffileinbytes,'bof');
+                            while length(readedfrombinary)<datalength
+                            readedfrombinary=[readedfrombinary;fread(fileID, min(interleaveblocksize/2^(datatype+1),datalength- length(readedfrombinary)),datatypestr)*datafactor];
+                            fseek(fileID,(interleaveskipbytes-interleaveblocksize),'cof');
+                             plot(readedfrombinary)%[1:datalength]*mode(diff(tempdata(:,1))),
+%                              pause
+                            end
+                            fclose(fileID);
+                            rawdata(NEXT).y=readedfrombinary';
+                            figure(3)
+                            clf
+                            plot([1:datalength]*mode(diff(tempdata(:,1))),readedfrombinary)%
+                            %%
+%                             pause
+                        else
+                            rawdata(NEXT).y=tempdata(:,2)';
+                            readbinaryfileaswell=0;
+                        end
+                    else
+                        rawdata(NEXT).y=tempdata(:,2)';
+                    end
                     rawdata(NEXT).si=mode(diff(tempdata(:,1)));
                     rawdata(NEXT).AmplifierID=AmplifierID;
                     rawdata(NEXT).AmplifierMode=AmplifierMode;
