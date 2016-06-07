@@ -42,11 +42,16 @@ for filenumber=1:length(vesszohely)+1
     
     order=['OpenOnlineFile "anyexport.onl"'];
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+    answer.ans{1,2}=[];
+    while ~strcmp(['"',windirname,'\',fname,'.dat"'],answer.ans{1,2})
     order=['OpenFile read ',windirname,'\',fname];
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
-    pause(.2);
+    pause(3);
     order='GetParameters DataFile';
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+    pause(3);
+    disp(['file needed: ',windirname,'\',fname,'.dat   file opened: ',answer.ans{1,2}]);
+    end
     disp(fname);
     if isempty(a)
         pause(1)
@@ -224,11 +229,15 @@ for filenumber=1:length(vesszohely)+1
                             readedfrombinary=[];
                             fileID = fopen([locations.tgtardir,'HEKAdata/',setupname,'/',fname,'.dat'],'r',endiantypestr);
                             fseek(fileID,offsetfrombeginningoffileinbytes,'bof');
-                            while length(readedfrombinary)<datalength
-                            readedfrombinary=[readedfrombinary;fread(fileID, min(interleaveblocksize/2^(datatype+1),datalength- length(readedfrombinary)),datatypestr)*datafactor];
-                            fseek(fileID,(interleaveskipbytes-interleaveblocksize),'cof');
-                             plot(readedfrombinary)%[1:datalength]*mode(diff(tempdata(:,1))),
-%                              pause
+                            if interleaveblocksize>0
+                                while length(readedfrombinary)<datalength
+                                    readedfrombinary=[readedfrombinary;fread(fileID, min(interleaveblocksize/2^(datatype+1),datalength- length(readedfrombinary)),datatypestr)*datafactor];
+                                    fseek(fileID,(interleaveskipbytes-interleaveblocksize),'cof');
+%                                     plot(readedfrombinary)%[1:datalength]*mode(diff(tempdata(:,1))),
+                                    %                              pause
+                                end
+                            else
+                                readedfrombinary=[fread(fileID, datalength- length(readedfrombinary),datatypestr)*datafactor];
                             end
                             fclose(fileID);
                             rawdata(NEXT).y=readedfrombinary';
