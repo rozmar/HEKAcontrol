@@ -7,7 +7,7 @@ function rawdata=HEKAexportbytreeinfo_main(fname,setupname,seriesnums,seriesdata
 % endtime=6.370328935729154E+04;
 
 %%
-close all
+
 locations=marcicucca_locations;
 exportdir=[locations.tgtardir,'ANALYSISdata/marci/Exportdir/'];
 winexportdir=[locations.tgtarwindir,'ANALYSISdata\marci\Exportdir\'];

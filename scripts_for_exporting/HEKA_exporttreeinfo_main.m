@@ -66,6 +66,6 @@ for i=1:size(hekafnames,1)
             end
         end
 %     end
-    progressbar((i-1)/size(hekafnames,1),0);
+%     progressbar((i-1)/size(hekafnames,1),0);
 end
 

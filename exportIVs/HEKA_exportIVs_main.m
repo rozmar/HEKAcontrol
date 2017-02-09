@@ -51,7 +51,7 @@ savepath=['MATLABdata/IV'];
 treepath=['MATLABdata/TreeData'];
 progressbar('overall progress');
 for i=1:size(hekafnames,1)
-    progressbar((i-1)/size(hekafnames,1));
+    progressbar((i)/size(hekafnames,1));
     if ~ischar(cell2mat(hekafnames(i,4)))
         dirname=char(hekafnames(i,1));
         setupname=dirname(strfind(dirname,'HEKAdata')+length('HEKAdata')+1:end);
@@ -62,7 +62,7 @@ for i=1:size(hekafnames,1)
         savepathnow=[savepath,'/',setupname];
         cd([locations.tgtardir,savepathnow]);
         exporteda=dir([fname(1:end-4),'.mat']);
-        if isempty(exporteda) || overwriteIVs==1 || exporteda.bytes<5000
+        if isempty(exporteda) || overwriteIVs==1 %|| exporteda.bytes<5000
             a=dir([treepath,'/',setupname,'/',fname]);
             if isempty(a)
                 HEKA_exporttreeinfo_main(hekafnames(i,:));
@@ -87,7 +87,8 @@ for i=1:size(hekafnames,1)
             rawdata=HEKAexportbytreeinfo_main(fname,setupname,seriesnums,seriesdata,neededseriesnums);
             iv=struct;
             IDX=0;
-            for seriesi=1:length(neededseriesnums)
+            for seriesii=1:length(neededseriesnums)
+                seriesi=neededseriesnums(seriesi);
                 for channeli=1:seriesnums(seriesi,4)
                     ivnow=struct;
                     si=rawdata(1).si;
