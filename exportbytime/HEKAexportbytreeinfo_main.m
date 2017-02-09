@@ -45,7 +45,7 @@ for filenumber=1:length(vesszohely)+1
     pause(1);
     order='GetParameters DataFile';
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
-    disp(fname);
+    disp(['exporting by tree info from : ' ,fname]);
     %%
     
     

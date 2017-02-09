@@ -49,7 +49,7 @@ for filenumber=1:length(vesszohely)+1
             [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
         end
         if length(answer.ans)>1&strcmp(answer.ans{2},['"',windirname,'\',fname,'"'])
-            disp(fname);
+            disp(['exporting tree info from: ',fname]);
             [seriesnums,seriesdata]=hcont_findseriesbyname({},{},signature,lastsignature,lastmodify);
         else
             seriesnums=[];
