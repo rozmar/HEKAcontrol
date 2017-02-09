@@ -1,4 +1,5 @@
 %% nevek es datumok becuppantasa
+FaultyFileList={'1607251og.dat'};
 [locations]=marcicucca_locations;
 hekafiledirs={[locations.tgtardir,'HEKAdata']};
 cd(char(hekafiledirs));
@@ -62,69 +63,74 @@ for i=1:size(hekafnames,1)
         savepathnow=[savepath,'/',setupname];
         cd([locations.tgtardir,savepathnow]);
         exporteda=dir([fname(1:end-4),'.mat']);
-        if isempty(exporteda) || overwriteIVs==1 %|| exporteda.bytes<5000
-            a=dir([treepath,'/',setupname,'/',fname]);
-            if isempty(a)
-                HEKA_exporttreeinfo_main(hekafnames(i,:));
-            end
-            load([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4)]);
-            neededseriesnums=[];
-            for seriesi=1:length(seriesdata)
-                neededseriesnums(seriesi)=false;
-                for potentiali=1:length(potentialnames)
-                    if any(strfind(seriesdata(seriesi).seriesname,potentialnames{potentiali}))
-                         neededseriesnums(seriesi)=true;
+        if any(strcmp(fname,FaultyFileList))
+            disp([fname, 'not processed because it is blacklisted'])
+        else
+            if isempty(exporteda) || overwriteIVs==1 %|| exporteda.bytes<5000
+                a=dir([treepath,'/',setupname,'/',fname]);
+                if isempty(a)
+                    HEKA_exporttreeinfo_main(hekafnames(i,:));
+                end
+                load([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4)]);
+                neededseriesnums=[];
+                for seriesi=1:length(seriesdata)
+                    neededseriesnums(seriesi)=false;
+                    for potentiali=1:length(potentialnames)
+                        if any(strfind(seriesdata(seriesi).seriesname,potentialnames{potentiali}))
+                            neededseriesnums(seriesi)=true;
+                        end
+                    end
+                    for exludei=1:length(excludename)
+                        if any(strfind(seriesdata(seriesi).seriesname,excludename{exludei}))
+                            neededseriesnums(seriesi)=false;
+                        end
                     end
                 end
-                for exludei=1:length(excludename)
-                    if any(strfind(seriesdata(seriesi).seriesname,excludename{exludei}))
-                         neededseriesnums(seriesi)=false;
+                neededseriesnums=find(neededseriesnums);
+                if ~isempty(neededseriesnums)
+                    rawdata=HEKAexportbytreeinfo_main(fname,setupname,seriesnums,seriesdata,neededseriesnums);
+                    iv=struct;
+                    IDX=0;
+                    for seriesii=1:length(neededseriesnums)
+                        seriesi=neededseriesnums(seriesii);
+                        for channeli=1:seriesnums(seriesi,4)
+                            ivnow=struct;
+                            si=rawdata(1).si;
+                            startIDX=IDX+1;
+                            currents=[];
+                            for sweepnum=1:seriesnums(seriesi,3)
+                                IDX=IDX+1;
+                                ivnow.realtime=rawdata(IDX).realtime;
+                                ivnow.timertime=rawdata(IDX).timertime;
+                                ivnow.(['v',num2str(sweepnum)])=rawdata(IDX).y';
+                                currents(sweepnum,:)=round(rawdata(IDX).segmentamplitudes*10^12);
+                            end
+                            ivnow.channellabel=rawdata(IDX).channellabel;
+                            ivnow.preamplnum=str2num(ivnow.channellabel(end));
+                            ivnow.recordingmode=rawdata(IDX).AmplifierMode{ivnow.preamplnum};
+                            ivnow.AmplifierID=rawdata(IDX).AmplifierID{ivnow.preamplnum};
+                            ivnow.sweepnum=seriesnums(seriesi,3);
+                            ivnow.timertime=[rawdata(startIDX:IDX).timertime]';
+                            ivnow.realtime=[rawdata(startIDX:IDX).realtime]';
+                            ivnow.seriesname=rawdata(IDX).seriesname;
+                            currdifi=diff(currents');
+                            ivnow.time=[1:length(ivnow.v1)]'*si;
+                            ivnow.segment=[diff(rawdata(IDX).segmenttimes)];
+                            ivnow.segment=[ivnow.segment,ivnow.time(end)-sum(ivnow.segment)]*1000;
+                            ivnow.holding=currents(1);
+                            ivnow.realcurrent=currents(:,2);
+                            ivnow.current=currdifi(1,:)';
+                            iv.(['g',num2str(seriesnums(seriesi,1)),'_s',num2str(seriesnums(seriesi,2)),'_c',num2str(rawdata(IDX).tracenumber)])=ivnow;
+                        end
                     end
+                    
+                    save([locations.tgtardir,savepathnow,'/',fname(1:end-4)],'iv');
                 end
             end
-            neededseriesnums=find(neededseriesnums);
-            
-            rawdata=HEKAexportbytreeinfo_main(fname,setupname,seriesnums,seriesdata,neededseriesnums);
-            iv=struct;
-            IDX=0;
-            for seriesii=1:length(neededseriesnums)
-                seriesi=neededseriesnums(seriesii);
-                for channeli=1:seriesnums(seriesi,4)
-                    ivnow=struct;
-                    si=rawdata(1).si;
-                    startIDX=IDX+1;
-                    currents=[];
-                    for sweepnum=1:seriesnums(seriesi,3)
-                        IDX=IDX+1;
-                        ivnow.realtime=rawdata(IDX).realtime;
-                        ivnow.timertime=rawdata(IDX).timertime;
-                        ivnow.(['v',num2str(sweepnum)])=rawdata(IDX).y';
-                        currents(sweepnum,:)=round(rawdata(IDX).segmentamplitudes*10^12);
-                    end
-                    ivnow.channellabel=rawdata(IDX).channellabel;
-                    ivnow.preamplnum=str2num(ivnow.channellabel(end));
-                    ivnow.recordingmode=rawdata(IDX).AmplifierMode{ivnow.preamplnum};
-                    ivnow.AmplifierID=rawdata(IDX).AmplifierID{ivnow.preamplnum};
-                    ivnow.sweepnum=seriesnums(seriesi,3);
-                    ivnow.timertime=[rawdata(startIDX:IDX).timertime]';
-                    ivnow.realtime=[rawdata(startIDX:IDX).realtime]';
-                    ivnow.seriesname=rawdata(IDX).seriesname;
-                    currdifi=diff(currents');
-                    ivnow.time=[1:length(ivnow.v1)]'*si;
-                    ivnow.segment=[diff(rawdata(IDX).segmenttimes)];
-                    ivnow.segment=[ivnow.segment,ivnow.time(end)-sum(ivnow.segment)]*1000;
-                    ivnow.holding=currents(1);
-                    ivnow.realcurrent=currents(:,2);
-                    ivnow.current=currdifi(1,:)';
-                    iv.(['g',num2str(seriesnums(seriesi,1)),'_s',num2str(seriesnums(seriesi,2)),'_c',num2str(rawdata(IDX).tracenumber)])=ivnow;
-                end
-            end
-            
-            save([locations.tgtardir,savepathnow,'/',fname(1:end-4)],'iv');
         end
     end
 end
-        progressbar(1);
+progressbar(1);
 % %% zúúúzás - régi módi
 % [locations]=marcicucca_locations;
 % overwriteIVs=0;
