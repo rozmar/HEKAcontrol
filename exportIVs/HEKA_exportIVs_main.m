@@ -1,5 +1,5 @@
 %% nevek es datumok becuppantasa
-FaultyFileList={'1607251og.dat','1610291og.dat','1608122og.dat','1611041og.dat','1610252og.dat','1509112og.dat','1611251og.dat','1510022og.dat'};
+FaultyFileList={'1604211og.dat','1607251og.dat','1610291og.dat','1608122og.dat','1611041og.dat','1610252og.dat','1509112og.dat','1611251og.dat','1510022og.dat'};
 [locations]=marcicucca_locations;
 hekafiledirs={[locations.tgtardir,'HEKAdata']};
 cd(char(hekafiledirs));
