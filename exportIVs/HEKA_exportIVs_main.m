@@ -66,11 +66,13 @@ for i=1:size(hekafnames,1)
         if any(strcmp(fname,FaultyFileList))
             disp([fname, 'not processed because it is blacklisted'])
         else
-            if isempty(exporteda) || overwriteIVs==1 %|| exporteda.bytes<5000
+            if isempty(exporteda) || overwriteIVs==1 || exporteda.bytes<5000
                 a=dir([treepath,'/',setupname,'/',fname]);
                 if isempty(a)
                     HEKA_exporttreeinfo_main(hekafnames(i,:));
                 end
+                a=dir([treepath,'/',setupname,'/',fname]);
+                if ~isempty(a)
                 load([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4)]);
                 neededseriesnums=[];
                 for seriesi=1:length(seriesdata)
@@ -128,6 +130,9 @@ for i=1:size(hekafnames,1)
                     end
                     
                     save([locations.tgtardir,savepathnow,'/',fname(1:end-4)],'iv');
+                end
+                else
+                    disp([fname,' tree file not found.. skipping'])
                 end
             end
         end
