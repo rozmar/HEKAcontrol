@@ -107,7 +107,7 @@ for i=1:size(hekafnames,1)
                             end
                             ivnow.channellabel=rawdata(IDX).channellabel;
                             ivnow.preamplnum=str2num(ivnow.channellabel(end));
-                            if isempty(ivnow.preamplnum) % in very early files the channellabel is only Voltage with no channel number..
+                            if isempty(ivnow.preamplnum) % in very early files the channellabel is only Voltage wo
                                 ivnow.preamplnum=1;
                             end
                             ivnow.recordingmode=rawdata(IDX).AmplifierMode{ivnow.preamplnum};
