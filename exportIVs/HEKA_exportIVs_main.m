@@ -1,5 +1,6 @@
 %% nevek es datumok becuppantasa
-FaultyFileList={'140223001br.dat','1105161ls.dat','1611042kb.dat','1610141kb.dat','1610043kb.dat','1610031kb.dat','1609211kb.dat','1606291kb.dat','1606172kb.dat','1606091kb.dat','1604211og.dat','1607251og.dat','1610291og.dat','1608122og.dat','1611041og.dat','1610252og.dat','1509112og.dat','1611251og.dat','1510022og.dat','1608022oa.dat','1609072oa.dat','1610202oa.dat'};
+clear all
+FaultyFileList={'1702103og.dat','1411121kb.dat','140223001br.dat','1105161ls.dat','1611042kb.dat','1610141kb.dat','1610043kb.dat','1610031kb.dat','1609211kb.dat','1606291kb.dat','1606172kb.dat','1606091kb.dat','1604211og.dat','1607251og.dat','1610291og.dat','1608122og.dat','1611041og.dat','1610252og.dat','1509112og.dat','1611251og.dat','1510022og.dat','1608022oa.dat','1609072oa.dat','1610202oa.dat'};
 [locations]=marcicucca_locations;
 hekafiledirs={[locations.tgtardir,'HEKAdata']};
 cd(char(hekafiledirs));
