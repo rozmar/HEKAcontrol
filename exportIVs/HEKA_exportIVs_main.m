@@ -1,5 +1,6 @@
 %% nevek es datumok becuppantasa
-FaultyFileList={'1611042kb.dat','1610141kb.dat','1610043kb.dat','1610031kb.dat','1609211kb.dat','1606291kb.dat','1606172kb.dat','1606091kb.dat','1604211og.dat','1607251og.dat','1610291og.dat','1608122og.dat','1611041og.dat','1610252og.dat','1509112og.dat','1611251og.dat','1510022og.dat','1608022oa.dat','1609072oa.dat','1610202oa.dat'}; 
+clear all
+FaultyFileList={'1702103og.dat','1411121kb.dat','140223001br.dat','1105161ls.dat','1611042kb.dat','1610141kb.dat','1610043kb.dat','1610031kb.dat','1609211kb.dat','1606291kb.dat','1606172kb.dat','1606091kb.dat','1604211og.dat','1607251og.dat','1610291og.dat','1608122og.dat','1611041og.dat','1610252og.dat','1509112og.dat','1611251og.dat','1510022og.dat','1608022oa.dat','1609072oa.dat','1610202oa.dat'};
 [locations]=marcicucca_locations;
 hekafiledirs={[locations.tgtardir,'HEKAdata']};
 cd(char(hekafiledirs));
@@ -9,15 +10,15 @@ while length(hekafiledirs)>prevdirnum
     prevdirnum=length(hekafiledirs);
     for i=1:length(hekafiledirs) %% megnézzük, hogy hány mappa van a kiválasztott mappákon belül
         hekafiledir=char(hekafiledirs(i));
-
-            cd(hekafiledir);
-            temp=dir;
-            for j=1:length(temp)
-                if temp(j).isdir==1 & ~or(strcmp(temp(j).name,'.'),strcmp(temp(j).name,'..')) & ~any(strcmp([hekafiledir,'/',temp(j).name],hekafiledirs))
-                    hekafiledirs{length(hekafiledirs)+1}=[hekafiledir,'/',temp(j).name];
-                end
+        
+        cd(hekafiledir);
+        temp=dir;
+        for j=1:length(temp)
+            if temp(j).isdir==1 & ~or(strcmp(temp(j).name,'.'),strcmp(temp(j).name,'..')) & ~any(strcmp([hekafiledir,'/',temp(j).name],hekafiledirs))
+                hekafiledirs{length(hekafiledirs)+1}=[hekafiledir,'/',temp(j).name];
             end
-
+        end
+        
     end
 end
 hekafnames=[];
@@ -42,7 +43,7 @@ for i=1:length(hekafiledirs)
     end
 end
 clear temp tempdb prevdirnum i j
-%% új megközelítés - 
+%% új megközelítés -
 % return
 potentialnames={'iv','IV'};
 excludename={'pp','+'};
@@ -51,7 +52,9 @@ overwriteIVs=0;
 savepath=['MATLABdata/IV'];
 treepath=['MATLABdata/TreeData'];
 progressbar('overall progress');
+hibasidxes=[];
 for i=1:size(hekafnames,1)
+    hiba=false;
     progressbar((i)/size(hekafnames,1));
     if ~ischar(cell2mat(hekafnames(i,4)))
         dirname=char(hekafnames(i,1));
@@ -65,6 +68,7 @@ for i=1:size(hekafnames,1)
         exporteda=dir([fname(1:end-4),'.mat']);
         if any(strcmp(fname,FaultyFileList))
             disp([fname, 'not processed because it is blacklisted'])
+            hiba=true;
         else
             if isempty(exporteda) || overwriteIVs==1 || exporteda.bytes<5000
                 a=dir([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4),'.mat']);
@@ -73,69 +77,73 @@ for i=1:size(hekafnames,1)
                 end
                 a=dir([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4),'.mat']);
                 if ~isempty(a)
-                load([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4)]);
-                neededseriesnums=[];
-                for seriesi=1:length(seriesdata)
-                    neededseriesnums(seriesi)=false;
-                    for potentiali=1:length(potentialnames)
-                        if any(strfind(seriesdata(seriesi).seriesname,potentialnames{potentiali}))
-                            neededseriesnums(seriesi)=true;
-                        end
-                    end
-                    for exludei=1:length(excludename)
-                        if any(strfind(seriesdata(seriesi).seriesname,excludename{exludei}))
-                            neededseriesnums(seriesi)=false;
-                        end
-                    end
-                end
-                neededseriesnums=find(neededseriesnums);
-                if ~isempty(neededseriesnums)
-                    rawdata=HEKAexportbytreeinfo_main(fname,setupname,seriesnums,seriesdata,neededseriesnums);
-                    iv=struct;
-                    IDX=0;
-                    for seriesii=1:length(neededseriesnums)
-                        seriesi=neededseriesnums(seriesii);
-                        for channeli=1:seriesnums(seriesi,4)
-                            ivnow=struct;
-                            si=rawdata(1).si;
-                            startIDX=IDX+1;
-                            currents=[];
-                            for sweepnum=1:seriesnums(seriesi,3)
-                                IDX=IDX+1;
-                                ivnow.realtime=rawdata(IDX).realtime;
-                                ivnow.timertime=rawdata(IDX).timertime;
-                                ivnow.(['v',num2str(sweepnum)])=rawdata(IDX).y';
-                                currents(sweepnum,:)=round(rawdata(IDX).segmentamplitudes*10^12);
+                    load([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4)]);
+                    neededseriesnums=[];
+                    for seriesi=1:length(seriesdata)
+                        neededseriesnums(seriesi)=false;
+                        for potentiali=1:length(potentialnames)
+                            if any(strfind(seriesdata(seriesi).seriesname,potentialnames{potentiali}))
+                                neededseriesnums(seriesi)=true;
                             end
-                            ivnow.channellabel=rawdata(IDX).channellabel;
-                            ivnow.preamplnum=str2num(ivnow.channellabel(end));
-                            if isempty(ivnow.preamplnum) % in very early files the channellabel is only Voltage with no channel number..
-                                ivnow.preamplnum=1;
+                        end
+                        for exludei=1:length(excludename)
+                            if any(strfind(seriesdata(seriesi).seriesname,excludename{exludei}))
+                                neededseriesnums(seriesi)=false;
                             end
-                            ivnow.recordingmode=rawdata(IDX).AmplifierMode{ivnow.preamplnum};
-                            ivnow.AmplifierID=rawdata(IDX).AmplifierID{ivnow.preamplnum};
-                            ivnow.sweepnum=seriesnums(seriesi,3);
-                            ivnow.timertime=[rawdata(startIDX:IDX).timertime]';
-                            ivnow.realtime=[rawdata(startIDX:IDX).realtime]';
-                            ivnow.seriesname=rawdata(IDX).seriesname;
-                            currdifi=diff(currents');
-                            ivnow.time=[1:length(ivnow.v1)]'*si;
-                            ivnow.segment=[diff(rawdata(IDX).segmenttimes)];
-                            ivnow.segment=[ivnow.segment,ivnow.time(end)-sum(ivnow.segment)]*1000;
-                            ivnow.holding=currents(1);
-                            ivnow.realcurrent=currents(:,2);
-                            ivnow.current=currdifi(1,:)';
-                            iv.(['g',num2str(seriesnums(seriesi,1)),'_s',num2str(seriesnums(seriesi,2)),'_c',num2str(rawdata(IDX).tracenumber)])=ivnow;
                         end
                     end
-                    
-                    save([locations.tgtardir,savepathnow,'/',fname(1:end-4)],'iv');
-                end
+                    neededseriesnums=find(neededseriesnums);
+                    if ~isempty(neededseriesnums)
+                        rawdata=HEKAexportbytreeinfo_main(fname,setupname,seriesnums,seriesdata,neededseriesnums);
+                        iv=struct;
+                        IDX=0;
+                        for seriesii=1:length(neededseriesnums)
+                            seriesi=neededseriesnums(seriesii);
+                            for channeli=1:seriesnums(seriesi,4)
+                                ivnow=struct;
+                                si=rawdata(1).si;
+                                startIDX=IDX+1;
+                                currents=[];
+                                for sweepnum=1:seriesnums(seriesi,3)
+                                    IDX=IDX+1;
+                                    ivnow.realtime=rawdata(IDX).realtime;
+                                    ivnow.timertime=rawdata(IDX).timertime;
+                                    ivnow.(['v',num2str(sweepnum)])=rawdata(IDX).y';
+                                    currents(sweepnum,:)=round(rawdata(IDX).segmentamplitudes*10^12);
+                                end
+                                ivnow.channellabel=rawdata(IDX).channellabel;
+                                ivnow.preamplnum=str2num(ivnow.channellabel(end));
+                                if isempty(ivnow.preamplnum) % in very early files the channellabel is only Voltage with no channel number..
+                                    ivnow.preamplnum=1;
+                                end
+                                ivnow.recordingmode=rawdata(IDX).AmplifierMode{ivnow.preamplnum};
+                                ivnow.AmplifierID=rawdata(IDX).AmplifierID{ivnow.preamplnum};
+                                ivnow.sweepnum=seriesnums(seriesi,3);
+                                ivnow.timertime=[rawdata(startIDX:IDX).timertime]';
+                                ivnow.realtime=[rawdata(startIDX:IDX).realtime]';
+                                ivnow.seriesname=rawdata(IDX).seriesname;
+                                currdifi=diff(currents');
+                                ivnow.time=[1:length(ivnow.v1)]'*si;
+                                ivnow.segment=[diff(rawdata(IDX).segmenttimes)];
+                                ivnow.segment=[ivnow.segment,ivnow.time(end)-sum(ivnow.segment)]*1000;
+                                ivnow.holding=currents(1);
+                                ivnow.realcurrent=currents(:,2);
+                                ivnow.current=currdifi(1,:)';
+                                iv.(['g',num2str(seriesnums(seriesi,1)),'_s',num2str(seriesnums(seriesi,2)),'_c',num2str(rawdata(IDX).tracenumber)])=ivnow;
+                            end
+                        end
+                        
+                        save([locations.tgtardir,savepathnow,'/',fname(1:end-4)],'iv');
+                    end
                 else
                     disp([fname,' tree file not found.. skipping'])
+                    hiba=true;
                 end
             end
         end
+    end
+    if hiba
+        hibasidxes=[hibasidxes,i];
     end
 end
 progressbar(1);
@@ -153,9 +161,9 @@ progressbar(1);
 %     lastmodify=0;
 % end
 % exportfnames={'preiv','postiv'};
-% 
+%
 % hcont_setPMconfig(signature,lastsignature,lastmodify);
-% 
+%
 % % hekawindir='/data/mount/PHYS44_WIN/Data/';
 % savepath=['MATLABdata/IV'];
 % % exportdir='/data/Userek/marci/analizis/HEKAdata/export/';
@@ -164,10 +172,10 @@ progressbar(1);
 %  savecounter=0;
 % prevhekafname=[];
 %     progressbar('overall progress','current file');
-% 
-% 
+%
+%
 % for i=1:size(hekafnames,1)
-%     
+%
 %     if ~ischar(cell2mat(hekafnames(i,4)))
 %     dirname=char(hekafnames(i,1));
 %     windirname=dirname;
@@ -183,7 +191,7 @@ progressbar(1);
 % %     disp(['copiing file: ',fname]);
 % %     copyfile([dirname,'/',fname],[hekawindir,'temp.dat']);
 % %     tempexts={'pgf','pul','amp'};
-% %     cd(dirname); 
+% %     cd(dirname);
 % %     for tempextnum=1:length(tempexts)
 % %         tempext=char(tempexts(tempextnum));
 % %         tempname=[fname(1:end-3),tempext];
@@ -192,9 +200,9 @@ progressbar(1);
 % %         end
 % %     end
 %     %%%HEKA dat file bemásolása a windows mappába
-%     
+%
 %     %%%% file megnyitása és csekkolása
-%     
+%
 % %     order=['OpenFile read temp.dat'];
 %     order=['OpenFile read ',windirname,'\',fname];
 %     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
@@ -205,9 +213,9 @@ progressbar(1);
 %     order=['OpenOnlineFile "IVexport.onl"'];
 %     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
 %     %%%% file megnyitása és csekkolása
-% 
-%      [IVs,~]=hcont_findseriesbyname({'iv','IV'},{'pp','+'},signature,lastsignature,lastmodify);    
-%     
+%
+%      [IVs,~]=hcont_findseriesbyname({'iv','IV'},{'pp','+'},signature,lastsignature,lastmodify);
+%
 %     iv=struct;
 %     for tempi=1:size(IVs,1)
 %         if IVs(tempi,3)>2
@@ -230,7 +238,7 @@ progressbar(1);
 %                 tracenum=str2double(cell2mat(answer.ans(2+(tracei-1)*5)));
 %                 order=['Set A  OA',num2str(tracenum),' TRUE'];
 %                 [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
-%                 
+%
 %                 order=['SetTarget ',num2str(groupi),' ',num2str(seriesi),' 1 ',num2str(tracenum),' 4 FALSE FALSE'];
 %                 [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
 %                 order=['Set A  OA',num2str(tracenum),' TRUE'];
@@ -239,7 +247,7 @@ progressbar(1);
 %                 [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
 %                 pause(1);
 % %                 temppath=hcont_convertpath(exportdir, 'heka');
-% 
+%
 %                 order=['Export overwrite "',winexportdir,'temp"'];
 %                 [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
 %                 pause(.1);
@@ -256,9 +264,9 @@ progressbar(1);
 %     %end
 %     order=['Set  @  File            "Close"'];
 %     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
-%     
+%
 %     end
-%     
+%
 %     end
 %     progressbar((i-1)/size(hekafnames,1),0);
 % end
