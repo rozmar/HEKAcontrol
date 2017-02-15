@@ -1,5 +1,6 @@
-function [seriesnums,seriesdata]=HEKA_exporttreeinfo(windirname,fname)
+function [seriesnums,seriesdata,hiba]=HEKA_exporttreeinfo(windirname,fname)
 % close all
+
 locations=marcicucca_locations;
 exportdir=[locations.tgtardir,'ANALYSISdata/marci/Exportdir/'];
 winexportdir=[locations.tgtarwindir,'ANALYSISdata\marci\Exportdir\'];
@@ -28,7 +29,7 @@ for filenumber=1:length(vesszohely)+1
         fname=fnameold(vesszohelyuj(filenumber)+1:vesszohelyuj(filenumber+1)-1);
     end
     pause(1)
-    order=['OpenOnlineFile "anyexport.onl"'];
+    order=['OpenOnlineFile "anyexansport.onl"'];
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
 
     
@@ -41,9 +42,11 @@ for filenumber=1:length(vesszohely)+1
         seriesnums=[];
         seriesdata=[];
     else
+        hiba=[];
         while ~isfield(answer,'ans') | ~((length(answer.ans)==2 && strcmp(answer.ans{2},['"',windirname,'\',fname,'"'])) | (length(answer.ans)==2 && strcmp(answer.ans{2},['""']))) % nem mindig tölti be a filet, ezért ellenőrizni kell | strcmp(answer.ans{1},['error_open_failed']) |
             order=['OpenFile read ',windirname,'\',fname];
             [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+            hiba=answer;
             pause(.2);
             order='GetParameters DataFile';
             [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);

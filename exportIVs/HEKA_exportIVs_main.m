@@ -73,7 +73,7 @@ for i=1:size(hekafnames,1)
             if isempty(exporteda) || overwriteIVs==1 || exporteda.bytes<5000
                 a=dir([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4),'.mat']);
                 if isempty(a)
-                    HEKA_exporttreeinfo_main(hekafnames(i,:));
+                    hiba=HEKA_exporttreeinfo_main(hekafnames(i,:));
                 end
                 a=dir([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4),'.mat']);
                 if ~isempty(a)

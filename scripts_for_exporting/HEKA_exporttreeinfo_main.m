@@ -1,4 +1,4 @@
-function HEKA_exporttreeinfo_main(hekafnames)
+function hiba=HEKA_exporttreeinfo_main(hekafnames)
 locations=marcicucca_locations;
 overwrite=0;
 savepath=['MATLABdata/TreeData'];
@@ -60,7 +60,7 @@ for i=1:size(hekafnames,1)
         savepathnow=[savepath,dirname(strfind(dirname,'HEKAdata')+length('HEKAdata'):end)];
         cd([locations.tgtardir,savepathnow]);
         if isempty(dir([fname(1:end-4),'.mat'])) || overwrite==1
-            [seriesnums,seriesdata]=HEKA_exporttreeinfo(windirname,fname);
+            [seriesnums,seriesdata,hiba]=HEKA_exporttreeinfo(windirname,fname);
             if ~isempty(seriesnums)
                 save([locations.tgtardir,savepathnow,'/',fname(1:end-4)],'seriesnums','seriesdata');
             end

@@ -198,12 +198,16 @@ for filenumber=1:length(vesszohely)+1
                         
                         if datatype==0
                             datatypestr='int16';
+                            byteszorzo=1;
                         elseif datatype==1
                             datatypestr='int32';
+                            byteszorzo=2;
                         elseif datatype==2
-                            datatypestr='uint32';
+                            datatypestr='float32';
+                            byteszorzo=2;
                         elseif datatype==3
-                            datatypestr='uint64';
+                            datatypestr='float64';
+                            byteszorzo=3;
                         end
                         
                         interleaveblocksize=answer.ans{12*(tracenumidx-1)+11};
@@ -231,7 +235,7 @@ for filenumber=1:length(vesszohely)+1
                             fseek(fileID,offsetfrombeginningoffileinbytes,'bof');
                             if interleaveblocksize>0
                                 while length(readedfrombinary)<datalength
-                                    readedfrombinary=[readedfrombinary;fread(fileID, min(interleaveblocksize/2^(datatype+1),datalength- length(readedfrombinary)),datatypestr)*datafactor];
+                                    readedfrombinary=[readedfrombinary;fread(fileID, min(interleaveblocksize/2^(byteszorzo),datalength- length(readedfrombinary)),datatypestr)*datafactor];
                                     fseek(fileID,(interleaveskipbytes-interleaveblocksize),'cof');
 %                                     plot(readedfrombinary)%[1:datalength]*mode(diff(tempdata(:,1))),
                                     %                              pause
