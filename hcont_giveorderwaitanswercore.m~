@@ -50,11 +50,9 @@ fclose(outfile);
 %%% várakozás a válaszra
 tempp=textread(frompatchmaster,'%s');
 tic;
-timepassed=0;
-while isempty(tempp) | str2num(char(tempp(1)))<0 | abs(str2num(char(tempp(1))))==abs(lastsignature) | (length(tempp)<2 & timepassed<3 & ~any(strfind(order,'@')) & ~any(strfind(order,' O ')))%% megvárja míg az output file signature-ja megváltozik és pozitív előjelű nem lesz - 
-    
+while isempty(tempp) | str2num(char(tempp(1)))<0 | abs(str2num(char(tempp(1))))==abs(lastsignature) | (length(tempp)<2 & ~(any(strfind(order,'@'))))%% megvárja míg az output file signature-ja megváltozik és pozitív előjelű nem lesz - hogyha @
+    timep
     tempp=textread(frompatchmaster,'%s');
-    timepassed=toc;
 end
 temp=dir(frompatchmaster);
 lastmodify=temp.date;

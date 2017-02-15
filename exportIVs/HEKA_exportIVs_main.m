@@ -68,12 +68,13 @@ for i=1:size(hekafnames,1)
         exporteda=dir([fname(1:end-4),'.mat']);
         if any(strcmp(fname,FaultyFileList))
             disp([fname, 'not processed because it is blacklisted'])
+            hiba_ok='blacklisted';
             hiba=true;
         else
             if isempty(exporteda) || overwriteIVs==1 || exporteda.bytes<5000
                 a=dir([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4),'.mat']);
                 if isempty(a)
-                    hiba=HEKA_exporttreeinfo_main(hekafnames(i,:));
+                    hiba_ok=HEKA_exporttreeinfo_main(hekafnames(i,:));
                 end
                 a=dir([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4),'.mat']);
                 if ~isempty(a)
@@ -138,12 +139,16 @@ for i=1:size(hekafnames,1)
                 else
                     disp([fname,' tree file not found.. skipping'])
                     hiba=true;
+                    hiba_ok=hiba_ok.ans;
                 end
             end
         end
     end
     if hiba
+        
         hibasidxes=[hibasidxes,i];
+        hibaok{length(hibasidxes)}=hiba_ok;
+        disp(['error : ',hiba_ok])
     end
 end
 progressbar(1);
