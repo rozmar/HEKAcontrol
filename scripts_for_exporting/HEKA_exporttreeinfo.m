@@ -1,4 +1,5 @@
 function [seriesnums,seriesdata,hiba]=HEKA_exporttreeinfo(windirname,fname)
+hiba=[];
 % close all
 
 locations=marcicucca_locations;
@@ -29,7 +30,7 @@ for filenumber=1:length(vesszohely)+1
         fname=fnameold(vesszohelyuj(filenumber)+1:vesszohelyuj(filenumber+1)-1);
     end
 %     pause(1)
-    order=['OpenOnlineFile "anyexansport.onl"'];
+    order=['OpenOnlineFile "anyexport.onl"'];
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
 
     
@@ -39,6 +40,7 @@ for filenumber=1:length(vesszohely)+1
 %     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
     if any(strfind(fname,'á'))|any(strfind(fname,'é'))|any(strfind(fname,'í'))|any(strfind(fname,'ő'))|any(strfind(fname,'ű'))|any(strfind(fname,'ü'))
         disp(['bad filename: ',fname])
+        hiba.ans={'bad filename'};
         seriesnums=[];
         seriesdata=[];
     else

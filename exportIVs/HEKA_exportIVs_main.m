@@ -139,7 +139,10 @@ for i=1:size(hekafnames,1)
                 else
                     disp([fname,' tree file not found.. skipping'])
                     hiba=true;
-                    hiba_ok=hiba_ok.ans;
+                    if ~isfield(hiba_ok,'ans')
+                        hiba_ok=HEKA_exporttreeinfo_main(hekafnames(i,:));
+                    end
+                        hiba_ok=hiba_ok.ans;
                 end
             end
         end
