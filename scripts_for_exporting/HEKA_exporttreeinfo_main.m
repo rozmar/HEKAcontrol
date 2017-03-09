@@ -55,9 +55,10 @@ for i=1:size(hekafnames,1)
         dirname=char(hekafnames(i,1));
         windirname=dirname;
         windirname(strfind(dirname,'/'))='\';
-        windirname=[locations.tgtarwindir,windirname(length(locations.tgtardir)+1:end)];
+%         windirname=[locations.tgtarwindir,windirname(length(locations.tgtardir)+1:end)];
         fname=char(hekafnames(i,2));
         savepathnow=[savepath,dirname(strfind(dirname,'HEKAdata')+length('HEKAdata'):end)];
+        savepathnow(strfind(savepathnow,'\'))='/';
         cd([locations.tgtardir,savepathnow]);
         if isempty(dir([fname(1:end-4),'.mat'])) || overwrite==1
             [seriesnums,seriesdata,hiba]=HEKA_exporttreeinfo(windirname,fname);

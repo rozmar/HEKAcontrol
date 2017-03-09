@@ -48,13 +48,14 @@ for filenumber=1:length(vesszohely)+1
         while ~isfield(answer,'ans') | ~((length(answer.ans)==2 && strcmp(answer.ans{2},['"',windirname,'\',fname,'"'])) | (length(answer.ans)==2 && strcmp(answer.ans{2},['""']))) % nem mindig tölti be a filet, ezért ellenőrizni kell | strcmp(answer.ans{1},['error_open_failed']) |
             order=['OpenFile read ',windirname,'\',fname];
             [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
-%             pause(.2);
+            pause(.2);
             hiba=answer;
             order='GetParameters DataFile';
             [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
         end
         if length(answer.ans)>1&strcmp(answer.ans{2},['"',windirname,'\',fname,'"'])
             disp(['exporting tree info from: ',fname]);
+            pause(.2);
             [seriesnums,seriesdata]=hcont_findseriesbyname({},{},signature,lastsignature,lastmodify);
         else
             seriesnums=[];
