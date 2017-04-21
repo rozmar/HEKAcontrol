@@ -98,6 +98,7 @@ for i=1:size(hekafnames,1)
                         rawdata=HEKAexportbytreeinfo_main(fname,setupname,seriesnums,seriesdata,neededseriesnums);
                         iv=struct;
                         IDX=0;
+                        %%
                         for seriesii=1:length(neededseriesnums)
                             seriesi=neededseriesnums(seriesii);
                             for channeli=1:seriesnums(seriesi,4)
@@ -122,7 +123,7 @@ for i=1:size(hekafnames,1)
                                 ivnow.sweepnum=seriesnums(seriesi,3);
                                 ivnow.timertime=[rawdata(startIDX:IDX).timertime]';
                                 ivnow.realtime=[rawdata(startIDX:IDX).realtime]';
-                                ivnow.seriesname=rawdata(IDX).seriesname;
+%                                 ivnow.seriesname=rawdata(IDX).seriesname;
                                 currdifi=diff(currents');
                                 ivnow.time=[1:length(ivnow.v1)]'*si;
                                 ivnow.segment=[diff(rawdata(IDX).segmenttimes)];
@@ -135,6 +136,7 @@ for i=1:size(hekafnames,1)
                         end
                         
                         save([locations.tgtardir,savepathnow,'/',fname(1:end-4)],'iv');
+
                     end
                 else
                     disp([fname,' tree file not found.. skipping'])
