@@ -22,7 +22,7 @@ pause(.1);
 hcont_setPMconfig(signature,lastsignature,lastmodify);
 fnameold=fname;
 vesszohely=strfind(fnameold,',');
-rawdata=struct;
+rawdata=[];
 for filenumber=1:length(vesszohely)+1
     if isempty(vesszohely)
         fname=fnameold;
@@ -47,7 +47,7 @@ for filenumber=1:length(vesszohely)+1
     a=dir([treeinfodir,'/',fname,'.mat']);
     while isempty(a)
         pause(1)
-        HEKA_exporttreeinfo_main({windirname,fname});
+        HEKA_exporttreeinfo_main({windirname,[fname,'.dat']});
         % % %         [seriesnums,seriesdata]=hcont_findseriesbyname({},{},signature,lastsignature,lastmodify);
         % % %         save([treeinfodir,'/',fname,'.mat'],'seriesnums','seriesdata');
         a=dir([treeinfodir,'/',fname,'.mat']);
