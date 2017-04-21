@@ -1,6 +1,6 @@
 %% nevek es datumok becuppantasa
 clear all
-FaultyFileList={'1702103og.dat','1411121kb.dat','140223001br.dat','1105161ls.dat','1611042kb.dat','1610141kb.dat','1610043kb.dat','1610031kb.dat','1609211kb.dat','1606291kb.dat','1606172kb.dat','1606091kb.dat','1604211og.dat','1607251og.dat','1610291og.dat','1608122og.dat','1611041og.dat','1610252og.dat','1509112og.dat','1611251og.dat','1510022og.dat','1608022oa.dat','1609072oa.dat','1610202oa.dat'};
+FaultyFileList={'1609211kb.dat','0512151mga2.dat','0512052mga2.dat','0512051mga2.dat','0512023mga2.dat','0511222mga2.dat','0511221mga2.dat','0511241cs.dat','0511212mga2.dat','0511221cs.dat','0511182mga2.dat','0511171mga2.dat','0511151mga2.dat','0312172ja2.dat','0511181mga2.dat','0511161mga2.dat','0511142mga2.dat','0403051ja2.dat','0402021ja2.dat','0511172mga2.dat','0511152mga2.dat','0511141mga2mga2.dat','0511113mga2.dat','0509072s.dat','0507081j.dat','0311073j.dat','0310093j.dat','0309292j.dat','1702103og.dat','1411121kb.dat','140223001br.dat','1105161ls.dat','1611042kb.dat','1610141kb.dat','1610043kb.dat','1610031kb.dat','1609211kb.dat','1606291kb.dat','1606172kb.dat','1606091kb.dat','1604211og.dat','1607251og.dat','1610291og.dat','1608122og.dat','1611041og.dat','1610252og.dat','1509112og.dat','1510022og.dat','1608022oa.dat','1609072oa.dat','1610202oa.dat'};
 [locations]=marcicucca_locations;
 hekafiledirs={[locations.tgtardir,'HEKAdata']};
 cd(char(hekafiledirs));
@@ -73,8 +73,10 @@ for i=1:size(hekafnames,1)
         else
             if isempty(exporteda) || overwriteIVs==1 || exporteda.bytes<5000
                 a=dir([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4),'.mat']);
-                if isempty(a)
+                hiba_ok=struct;
+                while isempty(a) & ~isfield(hiba_ok,'ans')
                     hiba_ok=HEKA_exporttreeinfo_main(hekafnames(i,:));
+                    a=dir([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4),'.mat']);
                 end
                 a=dir([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4),'.mat']);
                 if ~isempty(a)
@@ -133,22 +135,17 @@ for i=1:size(hekafnames,1)
                                 iv.(['g',num2str(seriesnums(seriesi,1)),'_s',num2str(seriesnums(seriesi,2)),'_c',num2str(rawdata(IDX).tracenumber)])=ivnow;
                             end
                         end
-                        
                         save([locations.tgtardir,savepathnow,'/',fname(1:end-4)],'iv');
                     end
                 else
                     disp([fname,' tree file not found.. skipping'])
                     hiba=true;
-                    if ~isfield(hiba_ok,'ans')
-                        hiba_ok=HEKA_exporttreeinfo_main(hekafnames(i,:));
-                    end
-                        hiba_ok=hiba_ok.ans;
+                    hiba_ok=hiba_ok.ans{1};
                 end
             end
         end
     end
     if hiba
-        
         hibasidxes=[hibasidxes,i];
         hibaok{length(hibasidxes)}=hiba_ok;
         disp(['error : ',hiba_ok])
