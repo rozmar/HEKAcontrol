@@ -1,4 +1,5 @@
 function hiba=HEKA_exporttreeinfo_main(hekafnames)
+hiba=[];
 locations=marcicucca_locations;
 overwrite=0;
 savepath=['MATLABdata/TreeData'];
