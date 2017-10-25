@@ -55,8 +55,12 @@ for i=1:size(hekafnames,1)
 %     miert volt benne.. valami hotfix..
         dirname=char(hekafnames(i,1));
         windirname=dirname;
-        windirname(strfind(dirname,'/'))='\';
-        windirname=[locations.tgtarwindir,windirname(length(locations.tgtardir)+1:end)];
+        if ~any(strfind(dirname,locations.tgtarwindir))
+            
+            windirname(strfind(dirname,'/'))='\';
+            windirname=[locations.tgtarwindir,windirname(length(locations.tgtardir)+1:end)];
+            
+        end
         fname=char(hekafnames(i,2));
         savepathnow=[savepath,dirname(strfind(dirname,'HEKAdata')+length('HEKAdata'):end)];
         savepathnow(strfind(savepathnow,'\'))='/';

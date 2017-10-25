@@ -28,10 +28,13 @@ if any(cell2mat(strfind(answer.ans, 'Not')))
 end
 order=['Get  @  Display         "Subtract Zero Offset"'];
 [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
-if ~any(cell2mat(strfind(answer.ans, 'Not')))
+while ~any(cell2mat(strfind(answer.ans, 'Not')))
     order=['Set  @  Display         "Subtract Zero Offset"'];
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+    order=['Get  @  Display         "Subtract Zero Offset"'];
+    [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
 end
+
 for tempi=0:5
     order=['Set  O  DispTrace       ',num2str(tempi),''];
     [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
