@@ -1,6 +1,10 @@
 %% nevek es datumok becuppantasa
-clear all
-FaultyFileList={'1609211kb.dat','0512151mga2.dat','0512052mga2.dat','0512051mga2.dat','0512023mga2.dat','0511222mga2.dat','0511221mga2.dat','0511241cs.dat','0511212mga2.dat','0511221cs.dat','0511182mga2.dat','0511171mga2.dat','0511151mga2.dat','0312172ja2.dat','0511181mga2.dat','0511161mga2.dat','0511142mga2.dat','0403051ja2.dat','0402021ja2.dat','0511172mga2.dat','0511152mga2.dat','0511141mga2mga2.dat','0511113mga2.dat','0509072s.dat','0507081j.dat','0311073j.dat','0310093j.dat','0309292j.dat','1702103og.dat','1411121kb.dat','140223001br.dat','1105161ls.dat','1611042kb.dat','1610141kb.dat','1610043kb.dat','1610031kb.dat','1609211kb.dat','1606291kb.dat','1606172kb.dat','1606091kb.dat','1604211og.dat','1607251og.dat','1610291og.dat','1608122og.dat','1611041og.dat','1610252og.dat','1509112og.dat','1510022og.dat','1608022oa.dat','1609072oa.dat','1610202oa.dat'};
+function HEKA_exportIVs_main(missingfiles)
+if nargin<1
+    missingfiles={};
+end
+% clear all
+FaultyFileList={'1709051og.dat','1707061og.dat','1707041og.dat','1706272oa.dat','1705201og.dat','1707311ma.dat','1609211kb.dat','0512151mga2.dat','0512052mga2.dat','0512051mga2.dat','0512023mga2.dat','0511222mga2.dat','0511221mga2.dat','0511241cs.dat','0511212mga2.dat','0511221cs.dat','0511182mga2.dat','0511171mga2.dat','0511151mga2.dat','0312172ja2.dat','0511181mga2.dat','0511161mga2.dat','0511142mga2.dat','0403051ja2.dat','0402021ja2.dat','0511172mga2.dat','0511152mga2.dat','0511141mga2mga2.dat','0511113mga2.dat','0509072s.dat','0507081j.dat','0311073j.dat','0310093j.dat','0309292j.dat','1702103og.dat','1411121kb.dat','140223001br.dat','1105161ls.dat','1611042kb.dat','1610141kb.dat','1610043kb.dat','1610031kb.dat','1609211kb.dat','1606291kb.dat','1606172kb.dat','1606091kb.dat','1604211og.dat','1607251og.dat','1610291og.dat','1608122og.dat','1611041og.dat','1610252og.dat','1509112og.dat','1510022og.dat','1608022oa.dat','1609072oa.dat','1610202oa.dat'};
 [locations]=marcicucca_locations;
 hekafiledirs={[locations.tgtardir,'HEKAdata']};
 cd(char(hekafiledirs));
@@ -71,7 +75,7 @@ for i=1:size(hekafnames,1)
             hiba_ok='blacklisted';
             hiba=true;
         else
-            if isempty(exporteda) || overwriteIVs==1 || exporteda.bytes<5000
+            if (isempty(missingfiles) | any(strcmp([fname(1:end-4)],missingfiles))) & (isempty(exporteda) || overwriteIVs==1 || exporteda.bytes<5000) 
                 a=dir([locations.tgtardir,treepath,'/',setupname,'/',fname(1:end-4),'.mat']);
                 hiba_ok=struct;
                 while isempty(a) & ~isfield(hiba_ok,'ans')
