@@ -112,6 +112,7 @@ for i=1:size(hekafnames,1)
                                 si=rawdata(1).si;
                                 startIDX=IDX+1;
                                 currents=[];
+                                %%
                                 for sweepnum=1:seriesnums(seriesi,3)
                                     IDX=IDX+1;
                                     ivnow.realtime=rawdata(IDX).realtime;
@@ -119,6 +120,7 @@ for i=1:size(hekafnames,1)
                                     ivnow.(['v',num2str(sweepnum)])=rawdata(IDX).y';
                                     currents(sweepnum,:)=round(rawdata(IDX).segmentamplitudes*10^12);
                                 end
+                                %%
                                 ivnow.channellabel=rawdata(IDX).channellabel;
                                 ivnow.preamplnum=str2num(ivnow.channellabel(end));
                                 if isempty(ivnow.preamplnum) % in very early files the channellabel is only Voltage with no channel number..
@@ -131,12 +133,15 @@ for i=1:size(hekafnames,1)
                                 ivnow.realtime=[rawdata(startIDX:IDX).realtime]';
 %                                 ivnow.seriesname=rawdata(IDX).seriesname;
                                 currdifi=diff(currents');
+                                segmentwithcurrinj=find(currdifi(:,1)~=0,1,'first')+1;
+                                
                                 ivnow.time=[1:length(ivnow.v1)]'*si;
                                 ivnow.segment=[diff(rawdata(IDX).segmenttimes)];
                                 ivnow.segment=[ivnow.segment,ivnow.time(end)-sum(ivnow.segment)]*1000;
+                                ivnow.segment=[sum(ivnow.segment(1:segmentwithcurrinj-1)),ivnow.segment(segmentwithcurrinj:end)];
                                 ivnow.holding=currents(1);
                                 ivnow.realcurrent=currents(:,2);
-                                ivnow.current=currdifi(1,:)';
+                                ivnow.current=currdifi(segmentwithcurrinj-1,:)';
                                 iv.(['g',num2str(seriesnums(seriesi,1)),'_s',num2str(seriesnums(seriesi,2)),'_c',num2str(rawdata(IDX).tracenumber)])=ivnow;
                             end
                         end
