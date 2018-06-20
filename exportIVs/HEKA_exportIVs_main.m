@@ -2,7 +2,11 @@
 function HEKA_exportIVs_main(missingfiles)
 if nargin<1
     missingfiles={};
+    overwriteIVs=0;
+else
+    overwriteIVs=1;
 end
+
 % clear all
 FaultyFileList={'1709051og.dat','1707061og.dat','1707041og.dat','1706272oa.dat','1705201og.dat','1707311ma.dat','1609211kb.dat','0512151mga2.dat','0512052mga2.dat','0512051mga2.dat','0512023mga2.dat','0511222mga2.dat','0511221mga2.dat','0511241cs.dat','0511212mga2.dat','0511221cs.dat','0511182mga2.dat','0511171mga2.dat','0511151mga2.dat','0312172ja2.dat','0511181mga2.dat','0511161mga2.dat','0511142mga2.dat','0403051ja2.dat','0402021ja2.dat','0511172mga2.dat','0511152mga2.dat','0511141mga2mga2.dat','0511113mga2.dat','0509072s.dat','0507081j.dat','0311073j.dat','0310093j.dat','0309292j.dat','1702103og.dat','1411121kb.dat','140223001br.dat','1105161ls.dat','1611042kb.dat','1610141kb.dat','1610043kb.dat','1610031kb.dat','1609211kb.dat','1606291kb.dat','1606172kb.dat','1606091kb.dat','1604211og.dat','1607251og.dat','1610291og.dat','1608122og.dat','1611041og.dat','1610252og.dat','1509112og.dat','1510022og.dat','1608022oa.dat','1609072oa.dat','1610202oa.dat'};
 [locations]=marcicucca_locations;
@@ -49,10 +53,10 @@ end
 clear temp tempdb prevdirnum i j
 %% új megközelítés -
 % return
-potentialnames={'iv','IV'};
+potentialnames={'iv','IV','Long square','long square','Long Square','Long','long'};
 excludename={'pp','+'};
 [locations]=marcicucca_locations;
-overwriteIVs=0;
+
 savepath=['MATLABdata/IV'];
 treepath=['MATLABdata/TreeData'];
 progressbar('overall progress');
@@ -102,6 +106,7 @@ for i=1:size(hekafnames,1)
                     neededseriesnums=find(neededseriesnums);
                     if ~isempty(neededseriesnums)
                         rawdata=HEKAexportbytreeinfo_main(fname,setupname,seriesnums,seriesdata,neededseriesnums);
+%%
                         iv=struct;
                         IDX=0;
                         %%
@@ -109,8 +114,9 @@ for i=1:size(hekafnames,1)
                             seriesi=neededseriesnums(seriesii);
                             for channeli=1:seriesnums(seriesi,4)
                                 ivnow=struct;
-                                si=rawdata(1).si;
+                                
                                 startIDX=IDX+1;
+                                si=rawdata(startIDX).si;
                                 currents=[];
                                 %%
                                 for sweepnum=1:seriesnums(seriesi,3)
@@ -131,16 +137,23 @@ for i=1:size(hekafnames,1)
                                 ivnow.sweepnum=seriesnums(seriesi,3);
                                 ivnow.timertime=[rawdata(startIDX:IDX).timertime]';
                                 ivnow.realtime=[rawdata(startIDX:IDX).realtime]';
+                                ivnow.bridgedRS=[rawdata(startIDX:IDX).bridgedRS]';
 %                                 ivnow.seriesname=rawdata(IDX).seriesname;
+%%
                                 currdifi=diff(currents');
-                                segmentwithcurrinj=find(currdifi(:,1)~=0,1,'first')+1;
-                                
+                                if size(currents,1)==1
+                                    segmentwithcurrinj=find(currdifi(:,1)~=0,1,'first')+1;
+                                else
+                                    segmentwithcurrinj=find(currents(1,:)~=currents(2,:),1,'first');
+                                end
                                 ivnow.time=[1:length(ivnow.v1)]'*si;
                                 ivnow.segment=[diff(rawdata(IDX).segmenttimes)];
+                                %%
                                 ivnow.segment=[ivnow.segment,ivnow.time(end)-sum(ivnow.segment)]*1000;
+                                %%
                                 ivnow.segment=[sum(ivnow.segment(1:segmentwithcurrinj-1)),ivnow.segment(segmentwithcurrinj:end)];
-                                ivnow.holding=currents(1);
-                                ivnow.realcurrent=currents(:,2);
+                                ivnow.holding=currents(1,segmentwithcurrinj-1);
+                                ivnow.realcurrent=currents(:,segmentwithcurrinj);
                                 ivnow.current=currdifi(segmentwithcurrinj-1,:)';
                                 iv.(['g',num2str(seriesnums(seriesi,1)),'_s',num2str(seriesnums(seriesi,2)),'_c',num2str(rawdata(IDX).tracenumber)])=ivnow;
                             end

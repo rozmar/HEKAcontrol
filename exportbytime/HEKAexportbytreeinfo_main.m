@@ -96,7 +96,8 @@ for i=1:length(neededseriesnums)
         temp=load([exportdir,'temp']);
         segmenttime=[];
         segmentampl=[];
-        for analnum=1:20
+        %%
+        for analnum=1:21
             analname=['Analysis_',num2str(groupnum),'_',num2str(seriesnum),'_'];
             if mod(analnum,2)==0;
                 segmenttime=[segmenttime,temp.([analname,num2str(analnum)])];
@@ -123,7 +124,8 @@ for i=1:length(neededseriesnums)
                     rawdata(NEXT).channellabel=tracename;
                     rawdata(NEXT).tracenumber=seriesdata(potsnum).tracenum(tracenum);
                     rawdata(NEXT).realtime=segmenttime(sweepnum,end);
-                    rawdata(NEXT).timertime=segmentampl(sweepnum,end);
+                    rawdata(NEXT).timertime=segmentampl(sweepnum,end-1);
+                    rawdata(NEXT).bridgedRS=segmentampl(sweepnum,end);
                     tempdata=temp.(['Trace_',num2str(groupnum),'_',num2str(seriesnum),'_',num2str(sweepnum),'_',num2str(rawdata(NEXT).tracenumber)]); %ez a lényeg
 
                     if readbinaryfileaswell==1
