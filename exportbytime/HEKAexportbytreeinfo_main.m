@@ -66,20 +66,19 @@ for i=1:length(neededseriesnums)
             pause(.5)
             amplsfound=0;
             clear AmplifierID AmplifierMode Amplifierholding
-            for i=1:length(NotebookRaw)
-                if any(strfind(char(NotebookRaw(i)),'EPC'))
+            for notebooki=1:length(NotebookRaw)
+                if any(strfind(char(NotebookRaw(notebooki)),'EPC'))
                     epcfound=1;
                     amplsfound=amplsfound+1;
-                    temptext=char(NotebookRaw(i));
+                    temptext=char(NotebookRaw(notebooki));
                     temptext(strfind(temptext,','))=[];
                     AmplifierID{amplsfound}=temptext;
-                    temptext=char(NotebookRaw(i+1));
+                    temptext=char(NotebookRaw(notebooki+1));
                     temptext(strfind(temptext,','))=[];
                     AmplifierMode{amplsfound}=temptext;
-                    temptext=char(NotebookRaw(i+2));
+                    temptext=char(NotebookRaw(notebooki+2));
                     temptext(strfind(temptext,','))=[];
                     Amplifierholding(amplsfound)=str2num(temptext);
-                    
                 end
             end
         end
