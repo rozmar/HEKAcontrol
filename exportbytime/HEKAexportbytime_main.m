@@ -1,5 +1,5 @@
 function rawdata=HEKAexportbytime_main(fname,setupname,channel,starttime,endtime)
-
+%HEKAexportbytime_main
 close all
 locations=marcicucca_locations;
 exportdir=[locations.tgtardir,'ANALYSISdata/marci/Exportdir/'];
