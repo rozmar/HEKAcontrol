@@ -46,8 +46,8 @@ for i=1:length(neededseriesnums)
     potsnum=neededseriesnums(i);
     for tracenum=1:seriesnums(potsnum,4)
         tracename=char(seriesdata(potsnum).tracename(tracenum));
-        groupnum=seriesnums(potsnum,1);
-        seriesnum=seriesnums(potsnum,2);
+        groupnum=find(unique(seriesnums(:,1))==seriesnums(potsnum,1));%if a group was deleted, this is how you find its index.. old one:%seriesnums(potsnum,1);
+        seriesnum=find(seriesnums(seriesnums(:,1)==seriesnums(potsnum,1),2)==seriesnums(potsnum,2));%if a series was deleted, this is how you find its index.. old one:%seriesnums(potsnum,2);
         sweepdb=seriesnums(potsnum,3);
         
         epcfound=0;
@@ -96,8 +96,20 @@ for i=1:length(neededseriesnums)
         segmenttime=[];
         segmentampl=[];
         %%
+        fieldnamek=fieldnames(temp);
+        fieldname=fieldnamek{1};
+        hyps=strfind(fieldname,'_');
+        groupnum_for_export=str2num(fieldname(hyps(1)+1:hyps(2)-1));
+        seriesnum_for_export=str2num(fieldname(hyps(2)+1:hyps(3)-1));
+        if groupnum_for_export~=groupnum
+            disp(['group number mismatch - using the exported: ',num2str(groupnum_for_export),' vs the original: ',num2str(groupnum)]);
+        end
+        if seriesnum_for_export~=seriesnum
+            disp(['series number mismatch - using the exported: ',num2str(seriesnum_for_export),' vs the original: ',num2str(seriesnum)]);
+        end
+%%
         for analnum=1:21
-            analname=['Analysis_',num2str(groupnum),'_',num2str(seriesnum),'_'];
+            analname=['Analysis_',num2str(groupnum_for_export),'_',num2str(seriesnum_for_export),'_'];
             if mod(analnum,2)==0;
                 segmenttime=[segmenttime,temp.([analname,num2str(analnum)])];
             else
@@ -125,7 +137,7 @@ for i=1:length(neededseriesnums)
                     rawdata(NEXT).realtime=segmenttime(sweepnum,end);
                     rawdata(NEXT).timertime=segmentampl(sweepnum,end-1);
                     rawdata(NEXT).bridgedRS=segmentampl(sweepnum,end);
-                    tempdata=temp.(['Trace_',num2str(groupnum),'_',num2str(seriesnum),'_',num2str(sweepnum),'_',num2str(rawdata(NEXT).tracenumber)]); %ez a lényeg
+                    tempdata=temp.(['Trace_',num2str(groupnum_for_export),'_',num2str(seriesnum_for_export),'_',num2str(sweepnum),'_',num2str(rawdata(NEXT).tracenumber)]); %ez a lényeg
 
                     if readbinaryfileaswell==1
                         order=['SetTarget ',num2str(groupnum),' ',num2str(seriesnum),' ',num2str(sweepnum),' ',num2str(1),' 3  TRUE TRUE'];
