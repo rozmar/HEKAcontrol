@@ -1,4 +1,8 @@
 function rawdata=HEKAexportbytreeinfo_main(fname,setupname,seriesnums,seriesdata,neededseriesnums)
+
+if any(strfind(fname,'.dat'))
+    fname(strfind(fname,'.dat'):end)=[];
+end
 % %%
 % fname='1305031rm.dat';
 % setupname='2P3DAO';
@@ -83,7 +87,7 @@ for i=1:length(neededseriesnums)
             end
         end
         %%% tree info begyujtese
-        
+        %%
         order=['SetTarget ',num2str(groupnum),' ',num2str(seriesnum),' ',num2str(1),' ',num2str(1),' 2 TRUE TRUE'];
         [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
         pause(.1);
@@ -93,6 +97,57 @@ for i=1:length(neededseriesnums)
         [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
         pause(.1);
         temp=load([exportdir,'temp']);
+        exportbinaryfromallsweeps=0;
+        %%
+        if length(fieldnames(temp))<2 % in  case of bug only first trace is exported workaround comes here
+            %%
+            while length(fieldnames(temp))<2
+                fieldnev=fieldnames(temp);
+                si=mode(diff(temp.(fieldnev{1})(:,1)));
+                order=['Get  @  ExportMode      "Traces"'];
+                if isfield(answer,'ans')
+                    answer=rmfield(answer,'ans');
+                end
+                while ~isfield(answer,'ans') | ~any(cell2mat(strfind(answer.ans, 'Not')))
+                    if ~isfield(answer,'ans')
+                        order=['Set  @  ExportMode      "Traces"'];
+                        [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+                        order=['Get  @  ExportMode      "Traces"'];
+                    end
+                    [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+                end
+                %%
+                [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+                order=['Export overwrite "',winexportdir,'temp"'];
+                [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+                pause(.1);
+                temp=load([exportdir,'temp']);
+            end
+            %%
+            temptest=temp;
+            while length(fieldnames(temptest))>2
+                order=['Get  @  ExportMode      "Traces"'];
+                if isfield(answer,'ans')
+                    answer=rmfield(answer,'ans');
+                end
+                while ~isfield(answer,'ans') | any(cell2mat(strfind(answer.ans, 'Not')))
+                    if ~isfield(answer,'ans')
+                        order=['Set  @  ExportMode      "Traces"'];
+                        [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+                        order=['Get  @  ExportMode      "Traces"'];
+                    end
+                    [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+                end
+                %%
+                [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+                order=['Export overwrite "',winexportdir,'temp"'];
+                [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
+                pause(.1);
+                temptest=load([exportdir,'temp']);
+            end
+            exportbinaryfromallsweeps=1;
+        end
+        
         segmenttime=[];
         segmentampl=[];
         %%
@@ -137,8 +192,12 @@ for i=1:length(neededseriesnums)
                     rawdata(NEXT).realtime=segmenttime(sweepnum,end);
                     rawdata(NEXT).timertime=segmentampl(sweepnum,end-1);
                     rawdata(NEXT).bridgedRS=segmentampl(sweepnum,end);
-                    tempdata=temp.(['Trace_',num2str(groupnum_for_export),'_',num2str(seriesnum_for_export),'_',num2str(sweepnum),'_',num2str(rawdata(NEXT).tracenumber)]); %ez a lényeg
-
+                    if exportbinaryfromallsweeps==0
+                        tempdata=temp.(['Trace_',num2str(groupnum),'_',num2str(seriesnum),'_',num2str(sweepnum),'_',num2str(rawdata(NEXT).tracenumber)]); %ez a lényeg
+                        si=mode(diff(tempdata(:,1)));
+                    else % if there is a bug, there is no Trace field
+                        tempdata=[];
+                    end
                     if readbinaryfileaswell==1
                         order=['SetTarget ',num2str(groupnum),' ',num2str(seriesnum),' ',num2str(sweepnum),' ',num2str(1),' 3  TRUE TRUE'];
                         [answer,signature,lastsignature,lastmodify]=hcont_giveorderwaitanswer(order,signature,lastsignature,lastmodify);
@@ -195,9 +254,10 @@ for i=1:length(neededseriesnums)
                         else
                             endiantypestr='l';
                         end
-                        if size(tempdata,1)<datalength | sweepnum>1 % if the first sweep is well exported it won't go sweep by sweep, the data is exported from the binary file if there is a length mismatch
+                        if exportbinaryfromallsweeps==1 | size(tempdata,1)<datalength | sweepnum>1 % if the first sweep is well exported it won't go sweep by sweep, the data is exported from the binary file if there is a bug (see above) or a length mismatch
                             disp(['group:',num2str(groupnum),' series:',num2str(seriesnum),' sweep:',num2str(sweepnum),'  is exported from binary - probably a continuous trace']);
                             readedfrombinary=[];
+                            
                             fileID = fopen([locations.tgtardir,'HEKAdata/',setupname,'/',fname,'.dat'],'r',endiantypestr);
                             fseek(fileID,offsetfrombeginningoffileinbytes,'bof');
                             if interleaveblocksize>0
@@ -214,7 +274,7 @@ for i=1:length(neededseriesnums)
                             rawdata(NEXT).y=readedfrombinary';
                             figure(3)
                             clf
-                            plot([1:datalength]*mode(diff(tempdata(:,1))),readedfrombinary)%
+                            plot([1:datalength]*si,readedfrombinary)%
                         else
                             rawdata(NEXT).y=tempdata(:,2)';
                             readbinaryfileaswell=0;
@@ -222,7 +282,7 @@ for i=1:length(neededseriesnums)
                     else
                         rawdata(NEXT).y=tempdata(:,2)';
                     end
-                    rawdata(NEXT).si=mode(diff(tempdata(:,1)));
+                    rawdata(NEXT).si=si;
                     rawdata(NEXT).AmplifierID=AmplifierID;
                     rawdata(NEXT).AmplifierMode=AmplifierMode;
                     rawdata(NEXT).Amplifierholding=Amplifierholding;
